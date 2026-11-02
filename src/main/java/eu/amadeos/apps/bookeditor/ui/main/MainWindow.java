@@ -1688,6 +1688,8 @@ public final class MainWindow extends JFrame {
             if (r.kept() > 0) text.append("\n\n").append(msg.format("open.taken-over.kept", r.kept()));
             if (r.dropped() > 0) text.append("\n\n").append(msg.format("open.taken-over.dropped", r.dropped()));
             ask.info(text.toString());
+        } catch (ForeignEpubReader.ProtectedException e) {
+            ask.error(msg.format("open.protected", p.getFileName()));
         } catch (IOException | RuntimeException e) {
             LOG.warn("Could not take over {}", p, e);
             ask.error(msg.format("error.open", p.getFileName(), String.valueOf(e.getMessage())));

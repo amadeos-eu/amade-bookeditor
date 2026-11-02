@@ -135,6 +135,22 @@ class ForeignEpubReaderTest {
     }
 
     @Test
+    void aBookProtectedAgainstCopyingIsRefusedButObfuscatedFontsAreFine() throws Exception {
+        Path drm = ForeignBooks.epub3(dir.resolve("drm.epub"), """
+                <encryption xmlns="urn:oasis:names:tc:opendocument:xmlns:container" xmlns:enc="http://www.w3.org/2001/04/xmlenc#">
+                <enc:EncryptedData><enc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+                <enc:CipherData><enc:CipherReference URI="OEBPS/text/one.xhtml"/></enc:CipherData></enc:EncryptedData>
+                </encryption>""");
+        assertThrows(ForeignEpubReader.ProtectedException.class, () -> ForeignEpubReader.read(drm));
+        Path fonts = ForeignBooks.epub3(dir.resolve("fonts.epub"), """
+                <encryption xmlns="urn:oasis:names:tc:opendocument:xmlns:container" xmlns:enc="http://www.w3.org/2001/04/xmlenc#">
+                <enc:EncryptedData><enc:EncryptionMethod Algorithm="http://www.idpf.org/2008/embedding"/>
+                <enc:CipherData><enc:CipherReference URI="OEBPS/fonts/a.otf"/></enc:CipherData></enc:EncryptedData>
+                </encryption>""");
+        assertEquals(2, ForeignEpubReader.read(fonts).book().chapters().size());
+    }
+
+    @Test
     void paths() {
         assertEquals("OEBPS/img/a.png", ForeignEpubReader.resolve("OEBPS/text/one.xhtml", "../img/a.png"));
         assertEquals("OEBPS/text/two.xhtml#x", ForeignEpubReader.resolve("OEBPS/text/one.xhtml", "two.xhtml#x"));

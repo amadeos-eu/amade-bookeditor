@@ -41,7 +41,13 @@ public final class ForeignBooks {
      * with grouped headings, footnotes in asides, a table, a list, a formula, a picture and links.
      */
     public static Path epub3(Path file) throws IOException {
+        return epub3(file, null);
+    }
+
+    /** The same EPUB 3, with an {@code encryption.xml} (DRM or font obfuscation). */
+    public static Path epub3(Path file, String encryption) throws IOException {
         Map<String, byte[]> f = new LinkedHashMap<>();
+        if (encryption != null) f.put("META-INF/encryption.xml", encryption.getBytes(StandardCharsets.UTF_8));
         f.put("META-INF/container.xml", container("OEBPS/package.opf"));
         f.put("OEBPS/package.opf", """
                 <?xml version="1.0" encoding="UTF-8"?>

@@ -80,6 +80,17 @@ public final class ForeignEpubReader {
     private record Item(String id, String path, String mediaType, String properties) {
     }
 
+    /** The book is protected against copying (DRM): its text files are encrypted. */
+    public static final class ProtectedException extends IOException {
+        public ProtectedException() {
+            super("the book is protected against copying (DRM)");
+        }
+    }
+
+    /** Font obfuscation is allowed in any EPUB and harmless; encrypted text is DRM. */
+    private static final Set<String> FONT_OBFUSCATION = Set.of("http://www.idpf.org/2008/embedding",
+            "http://ns.adobe.com/pdf/enc#RC");
+
     private final ZipFile zip;
     private final Book book;
     private final Map<String, ClassStyle> classes = new HashMap<>();
@@ -104,6 +115,14 @@ public final class ForeignEpubReader {
     public static Result read(Path file) throws IOException {
         try (ZipFile zip = new ZipFile(file.toFile(), StandardCharsets.UTF_8)) {
             String opfPath = EpubReader.rootFile(zip);
+            if (zip.getEntry("META-INF/encryption.xml") != null) {
+                Document enc = EpubReader.xml(EpubReader.text(zip, "META-INF/encryption.xml"));
+                for (Element method : enc.select("*")) {
+                    if (method.tagName().endsWith("EncryptionMethod") && !FONT_OBFUSCATION.contains(method.attr("Algorithm"))) {
+                        throw new ProtectedException();
+                    }
+                }
+            }
             Document opf = EpubReader.xml(EpubReader.text(zip, opfPath));
             Element metadata = opf.selectFirst("metadata");
             if (metadata == null) throw new EpubReader.NotEditableException("no metadata in " + opfPath, false);
