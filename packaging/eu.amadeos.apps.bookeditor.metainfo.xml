@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata of amade-bookeditor, installed as /usr/share/metainfo/eu.amadeos.apps.bookeditor.metainfo.xml.
+     amadeOS Software shows it for the installed package; a repository's appstream-generator reads it too. -->
+<component type="desktop-application">
+  <id>eu.amadeos.apps.bookeditor</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>EUPL-1.2</project_license>
+
+  <name>amadeOS Book Editor</name>
+
+  <summary>Write a book and save it as an e-book (EPUB 3)</summary>
+  <summary xml:lang="de">Ein Buch schreiben und als E-Book (EPUB 3) speichern</summary>
+  <summary xml:lang="fr">Écrire un livre et l’enregistrer comme livre numérique (EPUB 3)</summary>
+  <summary xml:lang="es">Escribir un libro y guardarlo como libro electrónico (EPUB 3)</summary>
+  <summary xml:lang="it">Scrivere un libro e salvarlo come e-book (EPUB 3)</summary>
+
+  <description>
+    <p>amade-bookeditor turns writers into publishers without asking them to learn HTML or CSS. You write chapters in a word-processor-like window, choose one of four looks for the book, and save a valid, accessible EPUB 3 that every e-reader and reading app can open. A preview shows each chapter as amadeOS Books sets it, on a phone, a tablet or an e-reader.</p>
+    <p xml:lang="de">amade-bookeditor macht Schreibende zu Verlegern, ohne dass sie HTML oder CSS lernen müssen. Sie schreiben Kapitel in einem Fenster wie in einer Textverarbeitung, wählen eines von vier Aussehen für das Buch und speichern ein gültiges, barrierefreies EPUB 3, das jeder E-Reader und jede Lese-App öffnen kann. Eine Vorschau zeigt jedes Kapitel so, wie amadeOS Books es setzt, auf Handy, Tablet oder E-Reader.</p>
+    <p xml:lang="fr">amade-bookeditor fait des auteurs des éditeurs sans leur demander d’apprendre le HTML ou le CSS. Vous écrivez les chapitres dans une fenêtre semblable à un traitement de texte, choisissez une des quatre apparences du livre et enregistrez un EPUB 3 valide et accessible que toutes les liseuses et applications de lecture peuvent ouvrir. Un aperçu montre chaque chapitre tel qu’amadeOS Books le compose, sur un téléphone, une tablette ou une liseuse.</p>
+    <p xml:lang="es">amade-bookeditor convierte a quien escribe en editor sin pedirle que aprenda HTML o CSS. Escribe los capítulos en una ventana parecida a un procesador de textos, elige uno de los cuatro aspectos del libro y guarda un EPUB 3 válido y accesible que cualquier lector y aplicación de lectura puede abrir. Una vista previa muestra cada capítulo tal como lo compone amadeOS Books, en un teléfono, una tableta o un lector electrónico.</p>
+    <p xml:lang="it">amade-bookeditor trasforma chi scrive in editore senza chiedergli di imparare HTML o CSS. Si scrivono i capitoli in una finestra simile a un programma di videoscrittura, si sceglie uno dei quattro aspetti del libro e si salva un EPUB 3 valido e accessibile che ogni e-reader e app di lettura può aprire. Un’anteprima mostra ogni capitolo come lo compone amadeOS Books, su telefono, tablet o e-reader.</p>
+    <ul>
+      <li>Chapters, headings, quotations, poems, letters, footnotes, links, pictures with descriptions and scene breaks</li>
+      <li xml:lang="de">Kapitel, Überschriften, Zitate, Gedichte, Briefe, Fußnoten, Links, Bilder mit Beschreibung und Szenenwechsel</li>
+      <li xml:lang="fr">Chapitres, intertitres, citations, poèmes, lettres, notes, liens, images décrites et changements de scène</li>
+      <li xml:lang="es">Capítulos, encabezados, citas, poemas, cartas, notas al pie, enlaces, imágenes con descripción y cambios de escena</li>
+      <li xml:lang="it">Capitoli, titoli, citazioni, poesie, lettere, note, collegamenti, immagini descritte e cambi di scena</li>
+      <li>Cover, title page and contents made from the book details; a simple cover maker</li>
+      <li xml:lang="de">Umschlag, Titelseite und Inhaltsverzeichnis aus den Buchangaben; ein einfacher Umschlag-Gestalter</li>
+      <li xml:lang="fr">Couverture, page de titre et table des matières faites à partir des informations du livre ; un créateur de couvertures simple</li>
+      <li xml:lang="es">Portada, portadilla e índice a partir de los datos del libro; un creador de portadas sencillo</li>
+      <li xml:lang="it">Copertina, frontespizio e indice dai dati del libro; un semplice creatore di copertine</li>
+      <li>Start from a text or Markdown file: chapters are found by their headings</li>
+      <li xml:lang="de">Start aus einer Text- oder Markdown-Datei: Kapitel werden an ihren Überschriften erkannt</li>
+      <li xml:lang="fr">Démarrage à partir d’un fichier texte ou Markdown : les chapitres sont trouvés par leurs titres</li>
+      <li xml:lang="es">Empezar desde un archivo de texto o Markdown: los capítulos se reconocen por sus títulos</li>
+      <li xml:lang="it">Inizio da un file di testo o Markdown: i capitoli vengono riconosciuti dai loro titoli</li>
+      <li>Check Book explains in plain words what is missing, and runs EPUBCheck when it is installed</li>
+      <li xml:lang="de">„Buch prüfen“ erklärt in einfachen Worten, was fehlt, und lässt EPUBCheck laufen, wenn es installiert ist</li>
+      <li xml:lang="fr">« Vérifier le livre » explique simplement ce qui manque et lance EPUBCheck s’il est installé</li>
+      <li xml:lang="es">«Revisar el libro» explica con palabras sencillas lo que falta y ejecuta EPUBCheck si está instalado</li>
+      <li xml:lang="it">«Controlla il libro» spiega con parole semplici cosa manca ed esegue EPUBCheck se è installato</li>
+      <li>Saves automatically every two minutes and keeps the last ten versions</li>
+      <li xml:lang="de">Speichert alle zwei Minuten automatisch und behält die letzten zehn Fassungen</li>
+      <li xml:lang="fr">Enregistre automatiquement toutes les deux minutes et garde les dix dernières versions</li>
+      <li xml:lang="es">Guarda automáticamente cada dos minutos y conserva las diez últimas versiones</li>
+      <li xml:lang="it">Salva automaticamente ogni due minuti e conserva le ultime dieci versioni</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">amade-bookeditor.desktop</launchable>
+  <icon type="stock">amade-bookeditor</icon>
+  <categories>
+    <category>Office</category>
+    <category>Publishing</category>
+  </categories>
+  <url type="homepage">https://github.com/amadeos-eu/amade-bookeditor</url>
+  <url type="bugtracker">https://github.com/amadeos-eu/amade-bookeditor/issues</url>
+  <developer id="eu.amadeos">
+    <name>amadeOS Project</name>
+  </developer>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>A chapter with the outline of the book</caption>
+      <caption xml:lang="de">Ein Kapitel mit der Gliederung des Buchs</caption>
+      <caption xml:lang="fr">Un chapitre avec le plan du livre</caption>
+      <caption xml:lang="es">Un capítulo con el esquema del libro</caption>
+      <caption xml:lang="it">Un capitolo con la struttura del libro</caption>
+      <image>https://raw.githubusercontent.com/amadeos-eu/amade-bookeditor/main/docs/screenshots/amade-bookeditor.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>The preview as on an e-reader</caption>
+      <caption xml:lang="de">Die Vorschau wie auf einem E-Reader</caption>
+      <caption xml:lang="fr">L’aperçu comme sur une liseuse</caption>
+      <caption xml:lang="es">La vista previa como en un lector electrónico</caption>
+      <caption xml:lang="it">L’anteprima come su un e-reader</caption>
+      <image>https://raw.githubusercontent.com/amadeos-eu/amade-bookeditor/main/docs/screenshots/amade-bookeditor-preview.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Check Book</caption>
+      <caption xml:lang="de">Buch prüfen</caption>
+      <caption xml:lang="fr">Vérifier le livre</caption>
+      <caption xml:lang="es">Revisar el libro</caption>
+      <caption xml:lang="it">Controlla il libro</caption>
+      <image>https://raw.githubusercontent.com/amadeos-eu/amade-bookeditor/main/docs/screenshots/amade-bookeditor-check.png</image>
+    </screenshot>
+  </screenshots>
+
+  <provides>
+    <binary>amade-bookeditor</binary>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>

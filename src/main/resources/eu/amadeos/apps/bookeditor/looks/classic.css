@@ -1,0 +1,45 @@
+/* Classic: a serif book face, first lines indented, no space between paragraphs. */
+body { font-family: serif; line-height: 1.4 }
+p { margin: 0; text-indent: 1.5em; text-align: justify }
+p.first { text-indent: 0 }
+p.chapter-label { font-size: 0.8em; text-transform: uppercase; text-align: center; text-indent: 0; margin: 3em 0 0.3em }
+h1 { font-size: 1.6em; font-weight: bold; text-align: center; margin: 0.3em 0 1.5em }
+h2 { font-size: 1.25em; font-weight: bold; margin: 1.5em 0 0.6em }
+h3 { font-size: 1.05em; font-weight: bold; font-style: italic; margin: 1.2em 0 0.4em }
+blockquote { margin: 1em 2em }
+blockquote p { text-indent: 0; margin: 0.3em 0 }
+blockquote.epigraph { margin: 0 0 2em 35%; font-style: italic; font-size: 0.9em }
+blockquote.epigraph p { text-align: right }
+div.poem { margin: 1em 2em }
+div.stanza { margin: 0 0 1em 0 }
+div.poem p { text-indent: 0; text-align: left; margin: 0 }
+div.letter { margin: 1em 2em; font-style: italic }
+div.letter p { text-indent: 0; margin: 0.3em 0 }
+/* Parts all looks share. */
+figure.picture { margin: 1.2em 0; text-align: center; page-break-inside: avoid }
+figure.picture img { max-width: 100%; height: auto }
+figure.small img { width: 40% }
+figure.medium img { width: 70% }
+figure.full img { width: 100% }
+figcaption { font-size: 0.85em; font-style: italic; margin-top: 0.4em; text-align: center; text-indent: 0 }
+hr.scene-break { margin: 1.4em 35%; border: 0; border-top: 1px solid #888; height: 0 }
+pre { font-family: monospace; font-size: 0.85em; margin: 1em 0; white-space: pre-wrap }
+p.centered { text-align: center; text-indent: 0 }
+sup, sub { font-size: 0.7em; line-height: 0 }
+a.noteref { text-decoration: none }
+aside.footnote { font-size: 0.85em }
+aside.footnote p { text-indent: 0 }
+section.dedication { margin-top: 30%; text-align: center }
+section.dedication p { text-align: center; text-indent: 0; font-style: italic; margin: 0.4em 0 }
+section.titlepage { margin-top: 20%; text-align: center }
+section.titlepage p { text-align: center; text-indent: 0 }
+p.book-subtitle { font-size: 1.2em; margin: 0.5em 0 2em }
+p.book-author { font-size: 1.2em; margin: 0.3em 0 }
+p.book-contributor { font-size: 0.9em; margin: 0.2em 0 }
+p.book-publisher { font-size: 0.9em; margin-top: 4em }
+p.book-rights { font-size: 0.75em; margin-top: 2em }
+body.cover { margin: 0; padding: 0; text-align: center }
+body.cover img { max-width: 100%; max-height: 100%; height: auto }
+nav ol { list-style-type: none; padding-left: 0 }
+nav li { margin: 0.4em 0 }
+

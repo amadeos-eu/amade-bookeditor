@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=amadeOS Book Editor
+GenericName=E-Book Editor
+GenericName[de]=E-Book-Editor
+GenericName[fr]=Éditeur de livres numériques
+GenericName[es]=Editor de libros electrónicos
+GenericName[it]=Editor di libri elettronici
+Comment=Write a book and save it as an e-book (EPUB 3)
+Comment[de]=Ein Buch schreiben und als E-Book (EPUB 3) speichern
+Comment[fr]=Écrire un livre et l'enregistrer comme livre numérique (EPUB 3)
+Comment[es]=Escribir un libro y guardarlo como libro electrónico (EPUB 3)
+Comment[it]=Scrivere un libro e salvarlo come e-book (EPUB 3)
+Icon=amade-bookeditor
+Exec=/usr/bin/amade-bookeditor %f
+Terminal=false
+Categories=Office;Publishing;WordProcessor;
+Keywords=epub;ebook;book;write;author;publish;editor;Buch;schreiben;Autor;
+StartupNotify=true
