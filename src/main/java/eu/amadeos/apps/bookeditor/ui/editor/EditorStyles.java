@@ -21,6 +21,8 @@ public final class EditorStyles {
     public static final Object PICTURE = new Key("book-picture");
     /** Character attribute of a scene break's object character. */
     public static final Object SCENE_BREAK = new Key("book-scene-break");
+    /** Character attribute of kept content's object character: the {@code Block.Kept}. */
+    public static final Object KEPT = new Key("book-kept");
 
     public static final Color LINK_COLOUR = new Color(0x1A, 0x5F, 0xB4);
     public static final Color HEADING_COLOUR = new Color(0x1F, 0x3A, 0x5F);

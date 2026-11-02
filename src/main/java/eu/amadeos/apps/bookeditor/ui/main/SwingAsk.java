@@ -114,10 +114,16 @@ public final class SwingAsk implements Ask {
     }
 
     @Override
-    public boolean openElsewhere(String message) {
-        Object[] options = {msg.get("open.in-books"), msg.get("button.close")};
-        return JOptionPane.showOptionDialog(owner, message, msg.get("open.not-editable.title"), JOptionPane.YES_NO_OPTION,
-                JOptionPane.INFORMATION_MESSAGE, null, options, options[1]) == 0;
+    public Foreign foreign(String message) {
+        Object[] options = {msg.get("open.edit-copy"), msg.get("open.in-books"), msg.get("button.cancel")};
+        int answer = JOptionPane.showOptionDialog(owner, "<html><div style='width:420px'>" + message + "</div></html>",
+                msg.get("open.not-editable.title"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                options, options[0]);
+        return switch (answer) {
+            case 0 -> Foreign.EDIT_COPY;
+            case 1 -> Foreign.READ;
+            default -> Foreign.CANCEL;
+        };
     }
 
     @Override

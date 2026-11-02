@@ -98,6 +98,32 @@ public final class Screenshots {
         });
         Thread.sleep(6000);
         shoot(w.checkDialog(), out.resolve("amade-bookeditor-check.png"));
+
+        // A book made elsewhere, taken over: its table is kept as a grey box
+        Path foreign = eu.amadeos.apps.bookeditor.ForeignBooks.epub3(work.resolve("The Lighthouse Keeper.epub"));
+        SwingUtilities.invokeAndWait(() -> {
+            w.checkDialog().dispose();
+            eu.amadeos.apps.bookeditor.ui.main.Ask real = new eu.amadeos.apps.bookeditor.ui.main.SwingAsk(w,
+                    Messages.load(BookEditorModule.class, BookEditorModule.MESSAGES, locale));
+            w.setAsk((eu.amadeos.apps.bookeditor.ui.main.Ask) java.lang.reflect.Proxy.newProxyInstance(
+                    Screenshots.class.getClassLoader(), new Class<?>[]{eu.amadeos.apps.bookeditor.ui.main.Ask.class},
+                    (proxy, method, a) -> switch (method.getName()) {
+                        case "foreign" -> eu.amadeos.apps.bookeditor.ui.main.Ask.Foreign.EDIT_COPY;
+                        case "info" -> null;
+                        case "unsaved" -> eu.amadeos.apps.bookeditor.ui.main.Ask.Unsaved.DISCARD;
+                        default -> method.invoke(real, a);
+                    }));
+            w.openFile(foreign);
+            var doc = w.editor().chapter();
+            for (int i = 0; i < doc.getLength(); i++) {
+                var leaf = doc.objectAt(i);
+                if (leaf != null && leaf.getAttributes().isDefined(eu.amadeos.apps.bookeditor.ui.editor.EditorStyles.KEPT)) {
+                    w.editor().setCaretPosition(i);
+                }
+            }
+        });
+        Thread.sleep(1500);
+        shoot(w, out.resolve("amade-bookeditor-kept.png"));
         System.exit(0);
     }
 

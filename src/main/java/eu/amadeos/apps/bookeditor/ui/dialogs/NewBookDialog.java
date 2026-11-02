@@ -132,7 +132,8 @@ public final class NewBookDialog extends JDialog {
 
     private boolean chooseFile(Path folder) {
         JFileChooser chooser = new JFileChooser(folder == null ? null : folder.toFile());
-        chooser.setFileFilter(new FileNameExtensionFilter(msg.get("new.file-filter"), "txt", "md", "markdown"));
+        chooser.setFileFilter(new FileNameExtensionFilter(msg.get("new.file-filter"),
+                eu.amadeos.apps.bookeditor.domain.importer.BookImport.EXTENSIONS.toArray(String[]::new)));
         if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return false;
         setSource(chooser.getSelectedFile().toPath());
         return true;

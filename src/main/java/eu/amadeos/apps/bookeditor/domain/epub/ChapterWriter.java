@@ -32,6 +32,21 @@ public final class ChapterWriter {
         return chapter.id().equals(Book.DEDICATION_ID) ? "dedication.xhtml" : "chapter-" + chapter.id() + ".xhtml";
     }
 
+    /**
+     * The manifest properties EPUB asks for when a chapter holds formulas ({@code mathml}) or drawings
+     * ({@code svg}); both can only come in as kept content of a book made elsewhere. Empty for most chapters.
+     */
+    public static String properties(Chapter chapter) {
+        boolean math = false, svg = false;
+        for (Block b : chapter.blocks()) {
+            if (b instanceof Block.Kept k) {
+                math |= k.xhtml().contains("<math");
+                svg |= k.xhtml().contains("<svg");
+            }
+        }
+        return ((math ? "mathml " : "") + (svg ? "svg" : "")).strip();
+    }
+
     /** The id the n-th {@code h2} of a chapter gets, for the table of contents. */
     static String headingId(int n) {
         return "h-" + n;
@@ -94,6 +109,12 @@ public final class ChapterWriter {
                 }
                 case Block.Picture p -> {
                     picture(p);
+                    afterText = false;
+                    i++;
+                }
+                case Block.Kept k -> {
+                    out.append("<div class=\"kept\" data-kind=\"").append(k.kind().key()).append("\">\n")
+                            .append(k.xhtml().strip()).append("\n</div>\n");
                     afterText = false;
                     i++;
                 }

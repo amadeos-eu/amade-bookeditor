@@ -1,5 +1,6 @@
 package eu.amadeos.apps.bookeditor.ui.main;
 
+import eu.amadeos.apps.bookeditor.ForeignBooks;
 import eu.amadeos.apps.bookeditor.TestBooks;
 import eu.amadeos.apps.bookeditor.bootstrap.BookEditorModule;
 import eu.amadeos.apps.bookeditor.domain.book.Block;
@@ -211,7 +212,71 @@ class MainWindowTest {
         ask.open = file;
         edtRun(window::open);
         assertNull(window.book());
-        assertTrue(ask.asked.contains("elsewhere"), ask.asked.toString());
+        assertTrue(ask.asked.contains("foreign"), ask.asked.toString());
+    }
+
+    @Test
+    void aForeignEpubCanBeTakenOverIntoANewBook() throws Exception {
+        Path file = ForeignBooks.epub3(dir.resolve("keeper.epub"));
+        ask.open = file;
+        ask.foreign = Ask.Foreign.EDIT_COPY;
+        edtRun(window::open);
+        assertEquals("The Lighthouse Keeper", window.book().info().title());
+        assertEquals(2, window.book().chapters().size());
+        assertTrue(window.dirty(), "a taken-over book is not saved yet");
+        assertEquals(1, ask.infos.size());
+        assertTrue(ask.infos.getFirst().contains("grey boxes"), ask.infos.getFirst());
+        // Saving asks where, suggesting a new name next to the original, which stays untouched
+        byte[] original = Files.readAllBytes(file);
+        ask.saveAs = dir.resolve("keeper (edited).epub");
+        edtRun(window::save);
+        assertTrue(ask.asked.contains("save-as keeper (edited).epub"), ask.asked.toString());
+        assertTrue(java.util.Arrays.equals(original, Files.readAllBytes(file)));
+        assertEquals("The Lighthouse Keeper", EpubReader.read(ask.saveAs).info().title());
+    }
+
+    @Test
+    void keptContentTurnsIntoTextOnRequest() throws Exception {
+        ask.open = ForeignBooks.epub3(dir.resolve("keeper.epub"));
+        ask.foreign = Ask.Foreign.EDIT_COPY;
+        edtRun(window::open);
+        int offset = edt(() -> {
+            var doc = window.editor().chapter();
+            for (int i = 0; i < doc.getLength(); i++) {
+                var leaf = doc.objectAt(i);
+                if (leaf != null && leaf.getAttributes().isDefined(eu.amadeos.apps.bookeditor.ui.editor.EditorStyles.KEPT)) return i;
+            }
+            return -1;
+        });
+        assertTrue(offset > 0);
+        ask.confirm = false;
+        edtRun(() -> window.editor().editObject(offset));
+        assertEquals(3, current().blocks().stream().filter(b -> b instanceof Block.Kept).count());
+        ask.confirm = true;
+        edtRun(() -> window.editor().editObject(offset));
+        Chapter c = current();
+        assertEquals(2, c.blocks().stream().filter(b -> b instanceof Block.Kept).count());
+        assertTrue(c.blocks().stream().anyMatch(b -> b instanceof Block.Paragraph p && p.plainText().equals("Monday – Rain")));
+    }
+
+    @Test
+    void aBookCanStartFromAWordDocument() throws Exception {
+        Path docx = Path.of(getClass().getResource("/eu/amadeos/apps/bookeditor/import/pandoc.docx").toURI());
+        ask.newBook = new NewBookDialog.Choice("Harbour", "A", "en", Look.CLASSIC, Optional.of(docx));
+        edtRun(window::newBook);
+        assertEquals(List.of("The Storm", "The Morning"), window.book().chapters().stream().map(Chapter::title).toList());
+        assertEquals(List.of(), ask.errors);
+    }
+
+    @Test
+    void anRtfFileWithoutLibreOfficeSaysWhatToDo() throws Exception {
+        Path rtf = Files.writeString(dir.resolve("story.rtf"), "{\\rtf1 x}");
+        window.setOffice(Optional::empty);
+        ask.newBook = new NewBookDialog.Choice("Story", "A", "en", Look.CLASSIC, Optional.of(rtf));
+        edtRun(window::newBook);
+        assertEquals(1, ask.errors.size());
+        assertTrue(ask.errors.getFirst().contains("LibreOffice"), ask.errors.getFirst());
+        assertEquals(1, window.book().chapters().size(), "the book starts empty");
     }
 
     @Test

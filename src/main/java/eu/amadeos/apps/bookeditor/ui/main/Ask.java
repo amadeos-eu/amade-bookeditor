@@ -17,6 +17,15 @@ import java.util.function.Supplier;
  * tests give it answers of their own, so they need no modal dialogs.
  */
 public interface Ask {
+    /** What to do with a book made by another program. */
+    enum Foreign {
+        /** Take it over into a new book; the original file stays as it is. */
+        EDIT_COPY,
+        /** Read it in Books. */
+        READ,
+        CANCEL
+    }
+
     /** What to do with changes that are not saved yet. */
     enum Unsaved {
         SAVE, DISCARD, CANCEL
@@ -45,8 +54,8 @@ public interface Ask {
 
     boolean confirm(String question);
 
-    /** A book that is not the editor's own: true if the writer wants to read it in Books instead. */
-    boolean openElsewhere(String message);
+    /** A book that is not the editor's own: edit a copy, read it in Books, or neither. */
+    Foreign foreign(String message);
 
     void error(String message);
 
