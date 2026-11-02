@@ -41,6 +41,9 @@ public final class ChapterEditor extends JTextPane {
         void editPicture(int offset, Block.Picture picture);
 
         void editFootnote(int offset, String text);
+
+        /** Kept content of a book made elsewhere: the writer may turn it into plain paragraphs. */
+        void editKept(int offset, Block.Kept kept);
     }
 
     private final UndoManager undo = new UndoManager();
@@ -317,6 +320,10 @@ public final class ChapterEditor extends JTextPane {
             handler.editFootnote(offset, (String) a.getAttribute(EditorStyles.FOOTNOTE));
             return true;
         }
+        if (a.isDefined(EditorStyles.KEPT)) {
+            handler.editKept(offset, (Block.Kept) a.getAttribute(EditorStyles.KEPT));
+            return true;
+        }
         return false;
     }
 
@@ -349,6 +356,10 @@ public final class ChapterEditor extends JTextPane {
             if (a.isDefined(EditorStyles.PICTURE)) {
                 Block.Picture p = (Block.Picture) a.getAttribute(EditorStyles.PICTURE);
                 return wrap(p.description().isEmpty() ? null : p.description());
+            }
+            if (a.isDefined(EditorStyles.KEPT)) {
+                String text = ((Block.Kept) a.getAttribute(EditorStyles.KEPT)).text();
+                return wrap(text.length() > 400 ? text.substring(0, 400) + "…" : text);
             }
         }
         String link = ChapterDocument.link(chapter().getCharacterElement(pos).getAttributes());
@@ -394,6 +405,7 @@ public final class ChapterEditor extends JTextPane {
             set.removeAttribute(EditorStyles.FOOTNOTE);
             set.removeAttribute(EditorStyles.PICTURE);
             set.removeAttribute(EditorStyles.SCENE_BREAK);
+            set.removeAttribute(EditorStyles.KEPT);
             set.removeAttribute(StyleConstants.IconAttribute);
         }
     }

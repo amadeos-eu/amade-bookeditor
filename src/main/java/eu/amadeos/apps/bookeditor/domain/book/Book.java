@@ -151,7 +151,10 @@ public final class Book {
         List<Chapter> all = new ArrayList<>(chapters);
         if (dedication != null) all.add(dedication);
         for (Chapter c : all) {
-            for (Block b : c.blocks()) if (b instanceof Block.Picture p && p.resource().equals(name)) return true;
+            for (Block b : c.blocks()) {
+                if (b instanceof Block.Picture p && p.resource().equals(name)) return true;
+                if (b instanceof Block.Kept k && k.pictures().contains(name)) return true;
+            }
         }
         return false;
     }

@@ -3,6 +3,7 @@ package eu.amadeos.apps.bookeditor.ui.editor;
 import eu.amadeos.apps.bookeditor.domain.book.Block;
 import eu.amadeos.apps.bookeditor.domain.book.Chapter;
 import eu.amadeos.apps.bookeditor.domain.book.Inline;
+import eu.amadeos.apps.bookeditor.domain.book.KeptKind;
 import eu.amadeos.apps.bookeditor.domain.book.Mark;
 import eu.amadeos.apps.bookeditor.domain.book.ParaStyle;
 
@@ -21,7 +22,8 @@ import java.util.function.Function;
 
 /**
  * The text of one chapter while it is edited. Paragraphs carry their {@link ParaStyle}; characters carry bold,
- * italic, superscript, subscript and links; footnotes, pictures and scene breaks are one object character each.
+ * italic, superscript, subscript and links; footnotes, pictures, scene breaks and kept content are one object
+ * character each.
  * {@link #fromChapter} and {@link #toBlocks} convert between this and the book model without loss.
  */
 public final class ChapterDocument extends DefaultStyledDocument {
@@ -65,6 +67,10 @@ public final class ChapterDocument extends DefaultStyledDocument {
                     }
                     case Block.SceneBreak ignored -> {
                         doc.insertString(start, OBJECT, sceneBreakAttributes());
+                        doc.styleParagraph(start, ParaStyle.TEXT, true);
+                    }
+                    case Block.Kept k -> {
+                        doc.insertString(start, OBJECT, keptAttributes(k));
                         doc.styleParagraph(start, ParaStyle.TEXT, true);
                     }
                 }
@@ -123,6 +129,22 @@ public final class ChapterDocument extends DefaultStyledDocument {
         return a;
     }
 
+    /** The label of a kept box ("Table") and the hint after it; the main window gives them in the user's language. */
+    private static volatile Function<KeptKind, String> keptLabels = KeptKind::key;
+    private static volatile String keptHint = "";
+
+    public static void setKeptTexts(Function<KeptKind, String> labels, String hint) {
+        keptLabels = labels;
+        keptHint = hint;
+    }
+
+    public static SimpleAttributeSet keptAttributes(Block.Kept kept) {
+        SimpleAttributeSet a = new SimpleAttributeSet();
+        a.addAttribute(EditorStyles.KEPT, kept);
+        StyleConstants.setIcon(a, new KeptIcon(kept, keptLabels.apply(kept.kind()), keptHint));
+        return a;
+    }
+
     // ---------------------------------------------------------------- paragraph styles
 
     /** The style of the paragraph at {@code offset}. */
@@ -152,7 +174,9 @@ public final class ChapterDocument extends DefaultStyledDocument {
     public boolean objectParagraph(Element para) {
         for (int i = 0; i < para.getElementCount(); i++) {
             AttributeSet a = para.getElement(i).getAttributes();
-            if (a.isDefined(EditorStyles.PICTURE) || a.isDefined(EditorStyles.SCENE_BREAK)) return true;
+            if (a.isDefined(EditorStyles.PICTURE) || a.isDefined(EditorStyles.SCENE_BREAK) || a.isDefined(EditorStyles.KEPT)) {
+                return true;
+            }
         }
         return false;
     }
@@ -176,11 +200,12 @@ public final class ChapterDocument extends DefaultStyledDocument {
                     int start = leaf.getStartOffset();
                     int end = Math.min(leaf.getEndOffset(), getLength());
                     String text = end > start ? getText(start, end - start) : "";
-                    if (a.isDefined(EditorStyles.PICTURE) || a.isDefined(EditorStyles.SCENE_BREAK)) {
+                    if (a.isDefined(EditorStyles.PICTURE) || a.isDefined(EditorStyles.SCENE_BREAK) || a.isDefined(EditorStyles.KEPT)) {
                         if (!inlines.isEmpty()) blocks.add(new Block.Paragraph(ParaStyle.TEXT, inlines));
                         inlines = new ArrayList<>();
                         hadObject = true;
                         blocks.add(a.isDefined(EditorStyles.PICTURE) ? (Block.Picture) a.getAttribute(EditorStyles.PICTURE)
+                                : a.isDefined(EditorStyles.KEPT) ? (Block.Kept) a.getAttribute(EditorStyles.KEPT)
                                 : new Block.SceneBreak());
                         continue;
                     }
@@ -270,7 +295,7 @@ public final class ChapterDocument extends DefaultStyledDocument {
         Element leaf = getCharacterElement(offset);
         AttributeSet a = leaf.getAttributes();
         return a.isDefined(EditorStyles.FOOTNOTE) || a.isDefined(EditorStyles.PICTURE) || a.isDefined(EditorStyles.SCENE_BREAK)
-                ? leaf : null;
+                || a.isDefined(EditorStyles.KEPT) ? leaf : null;
     }
 
     /** Replaces the object character at {@code offset} with one carrying new attributes (an edited picture or note). */

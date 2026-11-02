@@ -5,6 +5,7 @@ import eu.amadeos.apps.bookeditor.domain.book.Book;
 import eu.amadeos.apps.bookeditor.domain.book.BookInfo;
 import eu.amadeos.apps.bookeditor.domain.book.Chapter;
 import eu.amadeos.apps.bookeditor.domain.book.Inline;
+import eu.amadeos.apps.bookeditor.domain.book.KeptKind;
 import eu.amadeos.apps.bookeditor.domain.book.License;
 import eu.amadeos.apps.bookeditor.domain.book.Link;
 import eu.amadeos.apps.bookeditor.domain.book.Look;
@@ -37,8 +38,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * Opens a book the editor saved. Books made elsewhere carry their own HTML and style sheets; the editor does not
- * open them yet and says so with {@link NotEditableException}.
+ * Opens a book the editor saved. Books made elsewhere carry their own HTML and style sheets; this reader says so
+ * with {@link NotEditableException}, and {@link eu.amadeos.apps.bookeditor.domain.importer.EpubImport} takes
+ * them over into a new book.
  */
 public final class EpubReader {
     private static final Pattern CHAPTER_FILE = Pattern.compile("(?:.*/)?chapter-([a-z0-9-]+)\\.xhtml");
@@ -104,22 +106,24 @@ public final class EpubReader {
         }
     }
 
-    private static String rootFile(ZipFile zip) throws IOException {
+    static String rootFile(ZipFile zip) throws IOException {
         if (zip.getEntry("META-INF/container.xml") == null) throw new NotEditableException("no container.xml", false);
         Element root = xml(text(zip, "META-INF/container.xml")).selectFirst("rootfile");
         if (root == null || root.attr("full-path").isEmpty()) throw new NotEditableException("no root file", false);
         return root.attr("full-path");
     }
 
-    private static Document xml(String text) {
-        return Jsoup.parse(text, "", Parser.xmlParser());
+    static Document xml(String text) {
+        Document doc = Jsoup.parse(text, "", Parser.xmlParser());
+        doc.outputSettings().prettyPrint(false);
+        return doc;
     }
 
-    private static String text(ZipFile zip, String name) throws IOException {
+    static String text(ZipFile zip, String name) throws IOException {
         return new String(bytes(zip, name), StandardCharsets.UTF_8);
     }
 
-    private static byte[] bytes(ZipFile zip, String name) throws IOException {
+    static byte[] bytes(ZipFile zip, String name) throws IOException {
         ZipEntry entry = zip.getEntry(name);
         if (entry == null) throw new IOException("missing in the book: " + name);
         try (var in = zip.getInputStream(entry)) {
@@ -162,6 +166,7 @@ public final class EpubReader {
         for (Element e : md.select("*")) {
             if (!e.tagName().equals("dc:creator") && !e.tagName().equals("dc:contributor")) continue;
             String code = refined(md, e.id(), "role");
+            if (code.isEmpty()) code = e.attr("opf:role"); // EPUB 2
             Role role = code.isEmpty() ? (e.tagName().equals("dc:creator") ? Role.AUTHOR : Role.EDITOR) : Role.of(code);
             people.add(new Person(e.text(), role));
         }
@@ -231,7 +236,9 @@ public final class EpubReader {
                     for (Element p : e.getElementsByTag("p")) blocks.add(paragraph(style, p, notes));
                 }
                 case "div" -> {
-                    if (e.hasClass("poem")) {
+                    if (e.hasClass("kept")) {
+                        blocks.add(new Block.Kept(KeptKind.of(e.attr("data-kind")), e.html().strip(), KeptText.words(e)));
+                    } else if (e.hasClass("poem")) {
                         boolean firstStanza = true;
                         for (Element stanza : e.children()) {
                             if (!firstStanza) blocks.add(new Block.Paragraph(ParaStyle.POEM, ""));

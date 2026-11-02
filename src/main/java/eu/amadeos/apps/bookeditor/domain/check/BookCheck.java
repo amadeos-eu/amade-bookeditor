@@ -69,6 +69,7 @@ public final class BookCheck {
                 }
                 case Block.SceneBreak ignored -> {
                 }
+                case Block.Kept k -> hasText = true;
                 case Block.Paragraph p -> {
                     if (!p.plainText().isBlank() && !(p.style() == eu.amadeos.apps.bookeditor.domain.book.ParaStyle.CHAPTER_TITLE)) {
                         hasText = true;

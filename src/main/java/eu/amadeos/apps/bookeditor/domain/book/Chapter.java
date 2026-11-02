@@ -57,6 +57,8 @@ public record Chapter(String id, boolean numbered, List<Block> blocks) {
                 }
             } else if (b instanceof Block.Picture pic) {
                 n += Words.count(pic.caption());
+            } else if (b instanceof Block.Kept k) {
+                n += Words.count(k.text());
             }
         }
         return n;

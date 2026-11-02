@@ -9,7 +9,11 @@
 
 ## Features
 
-- **New Book** (Ctrl+N): title, author, language and one of four **looks** (*Classic*, *Modern*, *Children's Book*, *Poetry*), starting with an empty chapter or **from a text file**: `.txt` is split at lines such as "Chapter 3" or "Kapitel IV", `.md` at `#` headings, with emphasis, links, footnotes (`[^1]`), quotations, code and the pictures next to the file.
+- **New Book** (Ctrl+N): title, author, language and one of four **looks** (*Classic*, *Modern*, *Children's Book*, *Poetry*), starting with an empty chapter or **from a document or text file**:
+  - `.odt` and `.docx` are split at their headings (the highest level used more than once starts a chapter), with bold, italic, superscript, subscript, links, footnotes and endnotes, pictures with their captions, quotations, centred and preformatted paragraphs; lists become paragraphs starting with "•" or their number, tables are kept as tables. The document's own title block is left out, the book has a title page.
+  - `.doc` and `.rtf` are first turned into OpenDocument by LibreOffice (when it is installed).
+  - `.txt` is split at lines such as "Chapter 3" or "Kapitel IV", `.md` at `#` headings, with emphasis, links, footnotes (`[^1]`), quotations, code and the pictures next to the file.
+- **Books made elsewhere** (EPUB 2 or 3): *Open* offers to **edit a copy**. The editor takes the book over into a new one: chapters (one per file, or one per top heading), headings, paragraphs, quotes, scene breaks, pictures with their descriptions, footnotes and endnotes, links between chapters, bold, italic and centred text, also where the book's style sheet sets them. What it has no style for (tables, lists, formulas, drawings) stays as it was and shows as a **grey box**; double-click one to turn it into plain paragraphs. Cover page, title page and table of contents are made anew, the look becomes *Classic*, and saving asks for a new name, so the original stays untouched.
 - **The outline** on the left: cover, title page, dedication, contents, the chapters, the pictures and the book details. Chapters are added (Ctrl+Enter), moved (Ctrl+Shift+Up/Down), split at the cursor, joined with the next one and deleted; a chapter can be left uncounted (a prologue).
 - **Writing**: paragraph styles *Text* (Ctrl+0), *Chapter Title* (Ctrl+1), *Heading* (Ctrl+2), *Subheading* (Ctrl+3), *Quotation*, *Epigraph*, *Poem*, *Letter*, *Code* and *Centred*; bold, italic, superscript and subscript; **footnotes** (Ctrl+Alt+F), **links** to other chapters or web pages (Ctrl+K), **scene breaks** and **pictures** with a description for blind readers, a caption and a size. Double-click a picture or footnote to change it. Special characters with Ctrl+Shift+U.
 - **Cover, title page and contents** are made from the book details; *Make a Cover* draws a simple cover (1600 × 2400) from title, author, colour and an optional picture.
@@ -19,7 +23,9 @@
 - **Saving**: *Save* (Ctrl+S) writes the `.epub` (through a temporary file, so a crash never leaves half a book); **every two minutes automatically** once the book has a file; the last ten versions of every book stay in `~/.cache/amadeos/book-editor/backups/`.
 - Five languages (English, Deutsch, Français, Español, Italiano), following the desktop language; *Options → Language* overrides it.
 
-This version opens only books it saved itself (it marks them in the package document). Other EPUBs open in Books; editing them and importing word-processor documents is planned.
+![A book made elsewhere, with a table, a list and a formula kept as grey boxes](docs/screenshots/amade-bookeditor-kept.png)
+
+Books the editor saved itself (it marks them in the package document) open as they are; the others are taken over as described above, or opened in Books for reading.
 
 ## What the EPUB contains
 
@@ -32,13 +38,13 @@ Java 25, Swing and Guice; start-up, theme and language come from `AmadeApplicati
 | Package | Contents |
 |---|---|
 | `bootstrap` | `AmadeBookEditorApplication`, `BookEditorModule` |
-| `domain.book` | `Book`, `BookInfo`, `Chapter`, `Block` (paragraph, picture, scene break), `Inline` (text, footnote), `ParaStyle`, `Look`, `Resource`, `License`, `Person`, `Role` |
-| `domain.epub` | `EpubWriter`, `EpubReader`, `ChapterWriter`, `BookTexts` (the words the book itself contains, per language) |
-| `domain.importer` | `TextImport` (plain text and Markdown) |
+| `domain.book` | `Book`, `BookInfo`, `Chapter`, `Block` (paragraph, picture, scene break, kept content), `Inline` (text, footnote), `ParaStyle`, `KeptKind`, `Look`, `Resource`, `License`, `Person`, `Role` |
+| `domain.epub` | `EpubWriter`, `EpubReader` (own books), `ForeignEpubReader` (books made elsewhere), `ChapterWriter`, `KeptText`, `BookTexts` (the words the book itself contains, per language) |
+| `domain.importer` | `BookImport` (chooses by file type), `OfficeImport` (ODT and DOCX), `LibreOfficeConverter` (DOC and RTF), `TextImport` (plain text and Markdown) |
 | `domain.check` | `BookCheck`, `Finding`, `EpubCheckRunner` |
 | `domain.cover` | `CoverDesign`, `CoverMaker`, `Pictures` |
 | `repository` | `EditorPreferences`, `Backups` |
-| `ui.editor` | `ChapterEditor` (a `JTextPane`), `ChapterDocument` (chapter ⇄ styled document), the icons for pictures, footnotes and scene breaks |
+| `ui.editor` | `ChapterEditor` (a `JTextPane`), `ChapterDocument` (chapter ⇄ styled document), the icons for pictures, footnotes, scene breaks and kept content |
 | `ui.dialogs` | New Book, Book Details, Make a Cover, Picture, Link, Footnote, Check Book |
 | `ui.main` | `MainWindow`, `OutlinePanel`, `Pages`, `PreviewPanel`, `Ask` (the questions the window asks, replaced in the tests) |
 
@@ -56,9 +62,7 @@ If `../amade-commons` is checked out next to this repository, Gradle builds agai
 
 ## Planned
 
-- Opening and editing EPUBs from other programs
-- Importing ODT and DOCX documents
-- Tables, lists and fonts of your own
+- Tables and lists you can edit in place, and fonts of your own
 - Exporting as PDF for print
 
 ## License

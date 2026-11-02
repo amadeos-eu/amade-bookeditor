@@ -31,11 +31,16 @@
       <li xml:lang="fr">Couverture, page de titre et table des matières faites à partir des informations du livre ; un créateur de couvertures simple</li>
       <li xml:lang="es">Portada, portadilla e índice a partir de los datos del libro; un creador de portadas sencillo</li>
       <li xml:lang="it">Copertina, frontespizio e indice dai dati del libro; un semplice creatore di copertine</li>
-      <li>Start from a text or Markdown file: chapters are found by their headings</li>
-      <li xml:lang="de">Start aus einer Text- oder Markdown-Datei: Kapitel werden an ihren Überschriften erkannt</li>
-      <li xml:lang="fr">Démarrage à partir d’un fichier texte ou Markdown : les chapitres sont trouvés par leurs titres</li>
-      <li xml:lang="es">Empezar desde un archivo de texto o Markdown: los capítulos se reconocen por sus títulos</li>
-      <li xml:lang="it">Inizio da un file di testo o Markdown: i capitoli vengono riconosciuti dai loro titoli</li>
+      <li>Start from a Word or OpenDocument document, a text or a Markdown file: chapters are found by their headings, footnotes and pictures come along</li>
+      <li xml:lang="de">Start aus einem Word- oder OpenDocument-Dokument, einer Text- oder Markdown-Datei: Kapitel werden an ihren Überschriften erkannt, Fußnoten und Bilder kommen mit</li>
+      <li xml:lang="fr">Démarrage à partir d’un document Word ou OpenDocument, d’un fichier texte ou Markdown : les chapitres sont trouvés par leurs titres, les notes et les images suivent</li>
+      <li xml:lang="es">Empezar desde un documento de Word u OpenDocument, un archivo de texto o Markdown: los capítulos se reconocen por sus títulos, las notas y las imágenes vienen con ellos</li>
+      <li xml:lang="it">Inizio da un documento Word o OpenDocument, un file di testo o Markdown: i capitoli vengono riconosciuti dai loro titoli, note e immagini vengono con sé</li>
+      <li>Edit a copy of e-books made elsewhere (EPUB 2 and 3); tables, lists and formulas stay as they are</li>
+      <li xml:lang="de">Eine Kopie von E-Books bearbeiten, die anderswo gemacht wurden (EPUB 2 und 3); Tabellen, Listen und Formeln bleiben, wie sie sind</li>
+      <li xml:lang="fr">Modifier une copie de livres numériques faits ailleurs (EPUB 2 et 3) ; tableaux, listes et formules restent tels quels</li>
+      <li xml:lang="es">Editar una copia de libros electrónicos hechos en otro lugar (EPUB 2 y 3); tablas, listas y fórmulas se quedan como están</li>
+      <li xml:lang="it">Modificare una copia di e-book fatti altrove (EPUB 2 e 3); tabelle, elenchi e formule restano come sono</li>
       <li>Check Book explains in plain words what is missing, and runs EPUBCheck when it is installed</li>
       <li xml:lang="de">„Buch prüfen“ erklärt in einfachen Worten, was fehlt, und lässt EPUBCheck laufen, wenn es installiert ist</li>
       <li xml:lang="fr">« Vérifier le livre » explique simplement ce qui manque et lance EPUBCheck s’il est installé</li>

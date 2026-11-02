@@ -20,6 +20,9 @@ import eu.amadeos.apps.bookeditor.domain.cover.CoverMaker;
 import eu.amadeos.apps.bookeditor.domain.cover.Pictures;
 import eu.amadeos.apps.bookeditor.domain.epub.EpubReader;
 import eu.amadeos.apps.bookeditor.domain.epub.EpubWriter;
+import eu.amadeos.apps.bookeditor.domain.epub.ForeignEpubReader;
+import eu.amadeos.apps.bookeditor.domain.importer.BookImport;
+import eu.amadeos.apps.bookeditor.domain.importer.LibreOfficeConverter;
 import eu.amadeos.apps.bookeditor.domain.importer.TextImport;
 import eu.amadeos.apps.bookeditor.repository.Backups;
 import eu.amadeos.apps.bookeditor.repository.EditorPreferences;
@@ -136,6 +139,10 @@ public final class MainWindow extends JFrame {
     // the book
     private Book book;
     private Path file;
+    /** LibreOffice for .doc and .rtf files, looked for when such a file comes; tests give their own. */
+    private Supplier<Optional<LibreOfficeConverter>> office = LibreOfficeConverter::find;
+    /** Where a book taken over from another program would be saved, until it has a file. */
+    private Path suggestedFile;
     private boolean dirty;
     private OutlinePanel.Kind shownKind;
     private String chapterId;
@@ -216,7 +223,13 @@ public final class MainWindow extends JFrame {
             public void editFootnote(int offset, String text) {
                 MainWindow.this.editFootnote(offset, text);
             }
+
+            @Override
+            public void editKept(int offset, Block.Kept kept) {
+                MainWindow.this.editKept(offset, kept);
+            }
         });
+        ChapterDocument.setKeptTexts(kind -> msg.get("kept." + kind.key()), msg.get("kept.hint"));
         editor.setLinkTitles(this::linkTitle);
         editor.addCaretListener(e -> showCaretState());
         editorScroll.setBorder(BorderFactory.createEmptyBorder());
@@ -272,6 +285,10 @@ public final class MainWindow extends JFrame {
 
     public void setClock(Supplier<Instant> clock) {
         this.clock = clock;
+    }
+
+    public void setOffice(Supplier<Optional<LibreOfficeConverter>> office) {
+        this.office = office;
     }
 
     /** Opens the books named on the command line, or shows the welcome page. */
@@ -1047,6 +1064,32 @@ public final class MainWindow extends JFrame {
         return -1;
     }
 
+    // --8<-- [start:kept]
+    /** Kept content of a book made elsewhere: after asking, it becomes plain paragraphs. */
+    private void editKept(int offset, Block.Kept kept) {
+        String id = currentChapterId();
+        if (id == null || !ask.confirm(msg.format("kept.to-text", msg.get("kept." + kept.kind().key())))) return;
+        int before = 0;
+        ChapterDocument doc = editor.chapter();
+        for (int i = 0; i < offset; i++) {
+            Element leaf = doc.objectAt(i);
+            if (leaf != null && leaf.getAttributes().isDefined(EditorStyles.KEPT)) before++;
+        }
+        commit();
+        Chapter c = book.chapter(id).orElseThrow();
+        List<Block> blocks = new ArrayList<>();
+        int seen = 0;
+        for (Block b : c.blocks()) {
+            if (b instanceof Block.Kept k && seen++ == before) blocks.addAll(eu.amadeos.apps.bookeditor.domain.epub.KeptText.paragraphs(k));
+            else blocks.add(b);
+        }
+        book.replace(c.withBlocks(blocks));
+        book.dropUnused();
+        showChapter(id);
+        afterChange();
+    }
+    // --8<-- [end:kept]
+
     private void insertSceneBreak() {
         if (currentChapterId() == null) return;
         editor.insertBlock(new Block.SceneBreak());
@@ -1559,13 +1602,16 @@ public final class MainWindow extends JFrame {
         Book b = Book.create(BookInfo.create(c.title(), c.author(), c.language()), c.look(), msg.get("chapter.new-title"));
         if (c.source().isPresent()) {
             try {
-                TextImport.Result r = TextImport.read(c.source().get(), b);
+                TextImport.Result r = BookImport.read(c.source().get(), b, office);
                 if (!r.chapters().isEmpty()) b.setChapters(r.chapters());
                 if (!r.missingPictures().isEmpty()) {
                     ask.info(msg.format("import.missing-pictures", String.join(", ", r.missingPictures())));
                 }
-            } catch (IOException e) {
-                ask.error(msg.format("error.import", c.source().get().getFileName(), e.getMessage()));
+            } catch (BookImport.NeedsLibreOfficeException e) {
+                ask.error(msg.format("import.needs-libreoffice", c.source().get().getFileName()));
+            } catch (IOException | RuntimeException e) {
+                LOG.warn("Could not import {}", c.source().get(), e);
+                ask.error(msg.format("error.import", c.source().get().getFileName(), String.valueOf(e.getMessage())));
             }
         }
         setBook(b, null);
@@ -1602,11 +1648,16 @@ public final class MainWindow extends JFrame {
             if (p.toAbsolutePath().getParent() != null) prefs.set("folder", p.toAbsolutePath().getParent());
         } catch (EpubReader.NotEditableException e) {
             if (e.epub()) {
-                if (ask.openElsewhere(msg.format("open.not-editable", p.getFileName()))) {
-                    try {
-                        launcher.open(p);
-                    } catch (IOException ex) {
-                        ask.error(msg.format("error.open", p.getFileName(), ex.getMessage()));
+                switch (ask.foreign(msg.format("open.not-editable", p.getFileName()))) {
+                    case EDIT_COPY -> takeOver(p);
+                    case READ -> {
+                        try {
+                            launcher.open(p);
+                        } catch (IOException ex) {
+                            ask.error(msg.format("error.open", p.getFileName(), ex.getMessage()));
+                        }
+                    }
+                    case CANCEL -> {
                     }
                 }
             } else {
@@ -1618,9 +1669,38 @@ public final class MainWindow extends JFrame {
         }
     }
 
+    // --8<-- [start:take-over]
+    /**
+     * Takes over a book made by another program into a new book. It has no file yet, so saving asks where; the
+     * suggested name ends in "(edited)", and the original stays as it was.
+     */
+    private void takeOver(Path p) {
+        try {
+            ForeignEpubReader.Result r = ForeignEpubReader.read(p);
+            setBook(r.book(), null);
+            Path folder = p.toAbsolutePath().getParent();
+            if (folder != null) prefs.set("folder", folder);
+            String name = p.getFileName().toString().replaceFirst("(?i)\\.epub$", "");
+            suggestedFile = (folder == null ? Path.of(".") : folder).resolve(msg.format("open.copy-name", name) + ".epub");
+            dirty = true;
+            updateTitle();
+            StringBuilder text = new StringBuilder(msg.format("open.taken-over", r.book().chapters().size()));
+            if (r.kept() > 0) text.append("\n\n").append(msg.format("open.taken-over.kept", r.kept()));
+            if (r.dropped() > 0) text.append("\n\n").append(msg.format("open.taken-over.dropped", r.dropped()));
+            ask.info(text.toString());
+        } catch (ForeignEpubReader.ProtectedException e) {
+            ask.error(msg.format("open.protected", p.getFileName()));
+        } catch (IOException | RuntimeException e) {
+            LOG.warn("Could not take over {}", p, e);
+            ask.error(msg.format("error.open", p.getFileName(), String.valueOf(e.getMessage())));
+        }
+    }
+    // --8<-- [end:take-over]
+
     private void setBook(Book b, Path f) {
         book = b;
         file = f;
+        suggestedFile = null;
         dirty = false;
         images.clear();
         if (checkDialog != null) {
@@ -1649,7 +1729,7 @@ public final class MainWindow extends JFrame {
         commit();
         String name = (book.info().title().isBlank() ? msg.get("outline.untitled") : book.info().title())
                 .replaceAll("[/\\\\:*?\"<>|]", "-").strip();
-        Path suggested = file != null ? file : folder().resolve(name + ".epub");
+        Path suggested = file != null ? file : suggestedFile != null ? suggestedFile : folder().resolve(name + ".epub");
         Optional<Path> target = ask.saveAs(suggested);
         if (target.isEmpty()) return false;
         Path p = target.get();

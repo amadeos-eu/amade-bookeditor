@@ -43,3 +43,10 @@ nav ol { list-style-type: none; padding-left: 0 }
 nav li { margin: 0.4em 0 }
 
 figure.medium img { width: 85% }
+
+/* Tables, lists and formulas kept from a book made elsewhere */
+div.kept { margin: 1em 0; }
+div.kept table { border-collapse: collapse; margin: 0 auto; max-width: 100%; }
+div.kept th, div.kept td { border: 1px solid #999; padding: 0.2em 0.5em; text-align: left; vertical-align: top; }
+div.kept ul, div.kept ol { margin: 0.5em 0 0.5em 1.5em; padding: 0; }
+div.kept img { max-width: 100%; }

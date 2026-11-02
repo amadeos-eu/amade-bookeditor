@@ -28,7 +28,7 @@ final class FakeAsk implements Ask {
     String footnote;
     Unsaved unsaved = Unsaved.DISCARD;
     boolean confirm = true;
-    boolean openElsewhere;
+    Foreign foreign = Foreign.CANCEL;
     final List<String> asked = new ArrayList<>();
     final List<String> errors = new ArrayList<>();
     final List<String> infos = new ArrayList<>();
@@ -106,9 +106,9 @@ final class FakeAsk implements Ask {
     }
 
     @Override
-    public boolean openElsewhere(String message) {
-        asked.add("elsewhere");
-        return openElsewhere;
+    public Foreign foreign(String message) {
+        asked.add("foreign");
+        return foreign;
     }
 
     @Override

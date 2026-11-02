@@ -205,8 +205,10 @@ public final class EpubWriter {
         spine.append("<itemref idref=\"nav\"/>\n");
         for (Chapter c : book.chapters()) {
             String id = "chapter-" + c.id();
+            String properties = ChapterWriter.properties(c);
             manifest.append("<item id=\"").append(id).append("\" href=\"text/").append(ChapterWriter.fileName(c))
-                    .append("\" media-type=\"application/xhtml+xml\"/>\n");
+                    .append("\" media-type=\"application/xhtml+xml\"")
+                    .append(properties.isEmpty() ? "" : " properties=\"" + properties + "\"").append("/>\n");
             spine.append("<itemref idref=\"").append(id).append("\"/>\n");
         }
         for (Resource r : book.resources().values()) {

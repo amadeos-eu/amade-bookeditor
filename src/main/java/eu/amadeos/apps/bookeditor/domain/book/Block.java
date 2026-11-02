@@ -65,4 +65,32 @@ public sealed interface Block {
     /** A change of scene, shown as a short line or "* * *". */
     record SceneBreak() implements Block {
     }
+
+    /**
+     * Content of a book made elsewhere that the editor cannot edit (a table, a list, a formula, a drawing): kept
+     * as it was and written back unchanged. The editor shows it as a grey box; the writer can turn it into plain
+     * paragraphs or delete it.
+     *
+     * @param kind  what it is, for the box's label
+     * @param xhtml the content as XHTML; pictures in it point to {@code ../images/<name>}
+     * @param text  its text without markup, for counting words and for the preview in the box
+     */
+    record Kept(KeptKind kind, String xhtml, String text) implements Block {
+        private static final java.util.regex.Pattern PICTURE =
+                java.util.regex.Pattern.compile("(?:src|xlink:href|href)=\"\\.\\./images/([^\"]+)\"");
+
+        public Kept {
+            Objects.requireNonNull(kind, "kind");
+            Objects.requireNonNull(xhtml, "xhtml");
+            text = text == null ? "" : text.strip().replaceAll("\\s+", " ");
+        }
+
+        /** The book's pictures the content shows, by resource name. */
+        public List<String> pictures() {
+            List<String> names = new ArrayList<>();
+            java.util.regex.Matcher m = PICTURE.matcher(xhtml);
+            while (m.find()) names.add(m.group(1));
+            return names;
+        }
+    }
 }
