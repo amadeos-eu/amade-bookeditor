@@ -19,7 +19,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -41,6 +40,9 @@ import java.util.function.Function;
  */
 final class Pages {
     private static final Color PAPER = Color.WHITE;
+    /** Text on the paper, whatever the theme: a dark palette's light label colour would vanish on white. */
+    private static final Color INK = new Color(0x22, 0x22, 0x22);
+    private static final Color HINT = new Color(0x6B, 0x6B, 0x6B);
 
     private Pages() {
     }
@@ -63,7 +65,7 @@ final class Pages {
 
     private static JLabel hint(String text) {
         JLabel l = new JLabel("<html><div style='width:420px'>" + text + "</div></html>");
-        l.setForeground(UIManager.getColor("Label.disabledForeground"));
+        l.setForeground(HINT);
         l.setAlignmentX(0);
         l.setBorder(BorderFactory.createEmptyBorder(4, 0, 10, 0));
         return l;
@@ -169,7 +171,7 @@ final class Pages {
         p.add(hint(msg.get("page.contents.hint")));
         for (Chapter c : book.chapters()) {
             int n = book.numberOf(c.id());
-            JButton b = new JButton((n > 0 ? n + "   " : "     ") + label.apply(c));
+            JButton b = new JButton((n > 0 ? "" : "     ") + label.apply(c));
             b.setBorderPainted(false);
             b.setContentAreaFilled(false);
             b.setHorizontalAlignment(SwingConstants.LEFT);
@@ -261,7 +263,25 @@ final class Pages {
         return scroll(p);
     }
 
+    /**
+     * Gives every label and flat text button on the page that still has the theme's colour the paper's ink. Framed
+     * buttons keep the theme's colours: they bring their own background.
+     */
+    private static void ink(java.awt.Container c) {
+        for (java.awt.Component child : c.getComponents()) {
+            boolean text = child instanceof JLabel
+                    || child instanceof javax.swing.AbstractButton b && !b.isContentAreaFilled();
+            if (text && (child.getForeground() == null
+                    || child.getForeground() instanceof javax.swing.plaf.UIResource)) {
+                child.setForeground(INK);
+            } else if (child instanceof JPanel panel) {
+                ink(panel);
+            }
+        }
+    }
+
     private static JScrollPane scroll(JPanel p) {
+        ink(p);
         JPanel holder = new JPanel(new BorderLayout());
         holder.setBackground(PAPER);
         holder.add(p, BorderLayout.NORTH);
