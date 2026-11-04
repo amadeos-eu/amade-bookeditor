@@ -50,6 +50,14 @@ class MessagesTest {
     }
 
     @Test
+    void everyRoleHasAName() throws IOException {
+        Properties english = load("");
+        for (eu.amadeos.apps.bookeditor.domain.book.Role r : eu.amadeos.apps.bookeditor.domain.book.Role.values()) {
+            assertTrue(english.containsKey("role." + r.key()), "role." + r.key());
+        }
+    }
+
+    @Test
     void everyTextTheCodeAsksForExists() throws IOException {
         Properties english = load("");
         Pattern used = Pattern.compile("msg\\.(?:get|format)\\(\"([a-z0-9.-]+[a-z0-9])\"");
