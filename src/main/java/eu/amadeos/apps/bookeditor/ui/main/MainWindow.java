@@ -33,6 +33,7 @@ import eu.amadeos.apps.bookeditor.ui.dialogs.NewBookDialog;
 import eu.amadeos.apps.bookeditor.ui.editor.ChapterDocument;
 import eu.amadeos.apps.bookeditor.ui.editor.ChapterEditor;
 import eu.amadeos.apps.bookeditor.ui.editor.EditorStyles;
+import eu.amadeos.apps.bookeditor.ui.icons.BookGlyph;
 import eu.amadeos.commons.chars.SpecialCharacters;
 import eu.amadeos.commons.config.XdgDirectories;
 import eu.amadeos.commons.desktop.DesktopLauncher;
@@ -251,7 +252,16 @@ public final class MainWindow extends JFrame {
         autosaveTimer = new Timer(AUTOSAVE_MS, e -> autosave());
         autosaveTimer.start();
 
-        previewButton = new JToggleButton(msg.get("toolbar.preview"));
+        Action previewAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setPreview(previewButton.isSelected());
+            }
+        };
+        previewAction.putValue(Action.ACTION_COMMAND_KEY, "toolbar.preview");
+        previewAction.putValue(Action.LARGE_ICON_KEY, new ToolIcon(BookGlyph.PREVIEW));
+        previewButton = ToolButtons.toggle(previewAction);
+        previewButton.setToolTipText(tip("toolbar.preview"));
         previewItem = new JCheckBoxMenuItem();
         autosaveItem = new JCheckBoxMenuItem();
         checkWhileWritingItem = new JCheckBoxMenuItem();
@@ -501,25 +511,16 @@ public final class MainWindow extends JFrame {
         });
         tb.add(styleBox);
         tb.add(Box.createHorizontalStrut(4));
-        tb.add(markButton(Mark.BOLD, "B", Font.BOLD));
-        tb.add(markButton(Mark.ITALIC, "I", Font.ITALIC));
+        tb.add(markButton(Mark.BOLD, BookGlyph.BOLD));
+        tb.add(markButton(Mark.ITALIC, BookGlyph.ITALIC));
         tb.addSeparator();
-        tb.add(textButton("toolbar.picture", "menu.insert.picture"));
-        tb.add(textButton("toolbar.footnote", "menu.insert.footnote"));
-        tb.add(textButton("toolbar.link", "menu.insert.link"));
-        tb.add(textButton("toolbar.scene-break", "menu.insert.scene-break"));
+        tb.add(iconButton("toolbar.picture", "menu.insert.picture", BookGlyph.PICTURE));
+        tb.add(iconButton("toolbar.footnote", "menu.insert.footnote", BookGlyph.FOOTNOTE));
+        tb.add(iconButton("toolbar.link", "menu.insert.link", BookGlyph.LINK));
+        tb.add(iconButton("toolbar.scene-break", "menu.insert.scene-break", BookGlyph.SCENE_BREAK));
         tb.add(Box.createHorizontalGlue());
-        previewButton.setName("toolbar.preview");
-        previewButton.setFocusable(false);
-        previewButton.setToolTipText(msg.get("toolbar.preview.tip"));
-        previewButton.addActionListener(e -> setPreview(previewButton.isSelected()));
         tb.add(previewButton);
-        tb.add(Box.createHorizontalStrut(4));
-        JButton check = new JButton(actionNamed("menu.book.check"));
-        check.setText(msg.get("toolbar.check"));
-        check.setName("toolbar.check");
-        check.setFocusable(false);
-        tb.add(check);
+        tb.add(iconButton("toolbar.check", "menu.book.check", BookGlyph.CHECK));
         tb.add(Box.createHorizontalStrut(6));
         return tb;
     }
@@ -542,45 +543,42 @@ public final class MainWindow extends JFrame {
         return bar;
     }
 
-    private JToggleButton markButton(Mark mark, String label, int style) {
-        JToggleButton b = new JToggleButton(label);
-        b.setFont(b.getFont().deriveFont(style, 14f));
-        b.setName("toolbar." + mark.name().toLowerCase(Locale.ROOT));
-        b.setFocusable(false);
-        b.setToolTipText(msg.get("menu.format." + mark.name().toLowerCase(Locale.ROOT)).replace("&", ""));
-        b.addActionListener(e -> toggle(mark));
+    private JToggleButton markButton(Mark mark, BookGlyph glyph) {
+        String name = mark.name().toLowerCase(Locale.ROOT);
+        Action a = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggle(mark);
+            }
+        };
+        a.putValue(Action.ACTION_COMMAND_KEY, "toolbar." + name);
+        a.putValue(Action.LARGE_ICON_KEY, new ToolIcon(glyph));
+        a.putValue(Action.SHORT_DESCRIPTION, msg.get("menu.format." + name).replace("&", ""));
+        JToggleButton b = ToolButtons.toggle(a);
         markButtons.put(mark, b);
-        chapterActions.add(new ButtonEnabler(b));
+        chapterActions.add(a);
         return b;
     }
 
-    private JButton textButton(String key, String actionKey) {
-        Action a = actionNamed(actionKey);
-        JButton b = new JButton(a);
-        b.setText(msg.get(key));
+    /**
+     * An icon button for a menu action. The name stays the toolbar key, the tooltip names what the button
+     * did when it still showed text, followed by its longer explanation.
+     */
+    private JButton iconButton(String key, String actionKey, BookGlyph glyph) {
+        JButton b = ToolButtons.button(actionNamed(actionKey));
+        b.setIcon(new ToolIcon(glyph));
         b.setName(key);
-        b.setFocusable(false);
-        b.setToolTipText(msg.get(key + ".tip"));
+        b.setToolTipText(tip(key));
         return b;
     }
 
-    /** Lets a plain button follow the chapter actions' enabled state. */
-    private static final class ButtonEnabler extends AbstractAction {
-        private final JComponent target;
-
-        ButtonEnabler(JComponent target) {
-            this.target = target;
-        }
-
-        @Override
-        public void setEnabled(boolean on) {
-            super.setEnabled(on);
-            target.setEnabled(on);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-        }
+    /** "Footnote: Insert a footnote at the cursor"; just the label when there is no explanation. */
+    private String tip(String key) {
+        String label = msg.get(key);
+        String more = msg.has(key + ".tip") ? msg.get(key + ".tip") : null;
+        if (more == null) return label;
+        // The scene break's label is "* * *", its explanation already starts with its name.
+        return label.chars().anyMatch(Character::isLetter) ? label + ": " + more : more;
     }
 
     private final Map<String, Action> actions = new HashMap<>();
