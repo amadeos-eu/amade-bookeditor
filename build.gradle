@@ -123,7 +123,7 @@ Section: text
 Recommends: epubcheck, hyphen-en-us, hyphen-de, hyphen-fr, hyphen-it, hyphen-es
 Priority: optional
 Architecture: all
-Depends: openjdk-25-jre | java-runtime (>= 25)
+Depends: openjdk-25-jre | java-runtime (>= 25), amadeos-java-options
 Maintainer: amadeOS Project <developers@datazuul.com>
 Description: EPUB 3 book editor for amadeOS
  Writes e-books without HTML: chapters in an outline, paragraph styles
